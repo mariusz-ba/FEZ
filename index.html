@@ -128,26 +128,16 @@
 				container3.add(GrassMesh);
 				container3.add(line2);
 				
-				for(var i = 0; i < 5; ++i) {
-					var cont = container3.clone();
-					cont.position.x = i * 10 + 30;
-					cont.position.z = 180;
-					scene.add(cont);
-				}
+				var table = []
 				
-				for(var i = 0; i < 5; ++i) {
-					var cont = container3.clone();
-					cont.position.x = i * 10 + 30 - 50;
-					cont.position.z = 30;
-					scene.add(cont);
-				}
+				table.push(container);
+				table.push(container2);
 				
 				player = container3.clone();
-				player.position.x = 30;
-				player.position.z = 180;
-				player.position.y = 10;
+				player.position.x = 50;
+				player.position.z = 150;
+				player.position.y = 25 +5;
 				scene.add(player);
-
                 scene.add(container)
 				scene.add(container2)
                 renderer.setClearColor(0x000000);
@@ -189,9 +179,12 @@ var c=0;
 				}
 				var tmo;
 				function rotateLeft(){
-				if(move_axis == 0) move_axis = 1;
-				else move_axis = 0;
+				if(move_axis >=3) move_axis=0;
+				else move_axis++
+				if((move_axis==0||move_axis==3) && speed >0) speed *= -1;
+				if((move_axis==2||move_axis==1) && speed <0) speed *= -1;
 				var it = 0;
+				console.log(move_axis, speed)
 				tmo = setInterval(function(){
 								++it;
 								var tempZ = camera.position.z * Math.cos(Math.PI/180) - camera.position.x * Math.sin(Math.PI/180)
@@ -202,9 +195,13 @@ var c=0;
 							}, 1);
 				}
 				function rotateRight(){
-				if(move_axis == 0) move_axis = 1;
-				else move_axis = 0;
+				if(move_axis <=0) move_axis=3;
+				else move_axis--
+				if((move_axis==0||move_axis==3) && speed >0) speed *= -1;
+				if((move_axis==2||move_axis==1) && speed <0) speed *= -1;
 				var it = 0;
+				
+				console.log(move_axis, speed)
 				tmo = setInterval(function(){
 								++it;
 								var tempZ = camera.position.z * Math.cos(-Math.PI/180) - camera.position.x * Math.sin(-Math.PI/180)
@@ -220,13 +217,13 @@ var c=0;
 					{
 						
 						case 65: // A - move left
-								if(move_axis == 0)
+								if(move_axis%2==0)
 									direction.x = -1;
 								else
 									direction.z = -1;
 							break;
 						case 68: // D - move right
-								if(move_axis == 0)
+								if(move_axis%2 == 0)
 									direction.x = 1;
 								else
 									direction.z = 1;
@@ -244,13 +241,13 @@ var c=0;
 							rotateRight();
 							break;
 						case 65: // A - move left
-								if(move_axis == 0)
+								if(move_axis%2 == 0)
 									direction.x = 0;
 								else
 									direction.z = 0;
 							break;
 						case 68: // D - move right
-								if(move_axis == 0)
+								if(move_axis%2 == 0)
 									direction.x = 0;
 								else
 									direction.z = 0;
@@ -258,10 +255,55 @@ var c=0;
 					}
 				},false)
 
+				
+
                 function animateScene() {
 					player.position.x += direction.x * speed;
 					player.position.z += direction.z * speed;
-				
+					
+					
+					if(move_axis==2)
+					{
+						for(var i=0;i<table.length;i++)
+						{
+							if((table[i].position.x+25 > player.position.x && table[i].position.x-25 < player.position.x) && (table[i].position.y+25 > player.position.y-10 && table[i].position.y-25 < player.position.y-10))
+							{	
+								player.position.z = table[i].position.z
+							}
+						}
+					}
+					if(move_axis==1)
+					{
+						for(var i=0;i<table.length;i++)
+						{
+							if((table[i].position.z+25 > player.position.z &&table[i].position.z-25 < player.position.z) && (table[i].position.y+25 > player.position.y-10 && table[i].position.y-25 < player.position.y-10))
+							{	
+								player.position.x = table[i].position.x
+							}
+						}
+					}
+					if(move_axis==0)
+					{
+						for(var i=0;i<table.length;i++)
+						{
+							if((table[i].position.x-25 > player.position.x && table[i].position.x+25 < player.position.x) && (table[i].position.y+25 > player.position.y-10 && table[i].position.y-25 < player.position.y-10))
+							{	
+								player.position.z = table[i].position.z
+							}
+						}
+					}
+					if(move_axis==3)
+					{
+						for(var i=0;i<table.length;i++)
+						{
+							if((table[i].position.z-25 > player.position.z &&table[i].position.z+25 < player.position.z) && (table[i].position.y+25 > player.position.y-10 && table[i].position.y-25 < player.position.y-10))
+							{	
+								player.position.x = table[i].position.x
+							}
+						}
+					}
+					
+					
                     camera.lookAt(scene.position)
                     requestAnimationFrame(animateScene);
 					//var tempZ = camera.position.z * Math.cos(rotation) - camera.position.x * Math.sin(rotation)
@@ -270,7 +312,6 @@ var c=0;
                     //camera.position.z = tempZ
 
                     renderer.render(scene, camera);
-					console.log(player.position.x);
                 }
                 animateScene();
             })
