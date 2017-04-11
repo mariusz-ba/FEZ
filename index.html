@@ -24,7 +24,7 @@
     </style>
     <script src="libs/jquery-3.1.1.js"></script>
     <script src="libs/three.js"></script>
-
+	<script src="js/RayCaster.js"></script>
 
     <script>
         
@@ -261,6 +261,7 @@ var c=0;
 					player.position.x += direction.x * speed;
 					player.position.z += direction.z * speed;
 					
+					//console.log(GetElementsUnder(scene, player, 0));
 					
 					if(move_axis==2)
 					{
