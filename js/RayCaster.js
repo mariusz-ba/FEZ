@@ -12,22 +12,21 @@ function GetElementsUnder(scene, object, axis)
 		x: object.position.x,
 		y: object.position.y,
 		z: object.position.z,
-		w: object.geometry.parameters.width,
-		h: object.geometry.parameters.depth
+		w: object.children[0].geometry.parameters.width,
+		h: object.children[0].geometry.parameters.depth
 	};
 
 	// Get all elements from scene
 	for(var i = 0; i < scene.children.length; ++i)
 	{
-		var element = scene.children[i];
-
+		var element = scene.children[i]; // element musi być obiektem3d
 		var element_data = {
-			x: element.position.x,
-			y: element.position.y,
-			z: element.position.z,
-			w: element.geometry.parameters.width,
-			h: element.geometry.parameters.depth
-		};
+				x: element.position.x,
+				y: element.position.y,
+				z: element.position.z,
+				w: element.children[0].geometry.parameters.width,
+				h: element.children[0].geometry.parameters.depth
+			};
 
 		if(element_data.y >= object_data.y) // Element is not under @object - skip this iteration
 			continue;

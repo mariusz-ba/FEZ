@@ -37,6 +37,7 @@
 		var isMoving = true;
 		var speed = 0.5;
 		var move_axis = 1; // 0 - x, 1 - z
+		var scene;
 		
         window.addEventListener("load", function () {
 
@@ -45,7 +46,7 @@
             var width = window.innerWidth;
             var height = window.innerHeight;
 
-                var scene = new THREE.Scene();
+                scene = new THREE.Scene();
                 
                 var camera = new THREE.OrthographicCamera(width / - 6, width / 6, height / 6, height / - 6, 1, 1000);
 
@@ -261,8 +262,25 @@ var c=0;
 					player.position.x += direction.x * speed;
 					player.position.z += direction.z * speed;
 					
-					//console.log(GetElementsUnder(scene, player, 0));
+					if(move_axis % 2 == 1) // Z
+					{
+						var elements_under = GetElementsUnder(scene, player, 1);
+						if(elements_under.length) {
+							console.log(elements_under[0].position.x);
+							player.position.x = elements_under[0].position.x;
+						}
+					}
+					else // X
+					{
+						var elements_under = GetElementsUnder(scene, player, 0);
+						if(elements_under.length) {
+							console.log(elements_under[0].position.z);
+							player.position.z = elements_under[0].position.z;
+						}
+					}
 					
+					//console.log(GetElementsUnder(scene, player, 0));
+					/*
 					if(move_axis==2)
 					{
 						for(var i=0;i<table.length;i++)
@@ -302,7 +320,7 @@ var c=0;
 								player.position.x = table[i].position.x
 							}
 						}
-					}
+					}*/
 					
 					
                     camera.lookAt(scene.position)
