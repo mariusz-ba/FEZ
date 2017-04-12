@@ -25,6 +25,8 @@
     <script src="libs/jquery-3.1.1.js"></script>
     <script src="libs/three.js"></script>
 	<script src="js/RayCaster.js"></script>
+    <script src="js/ConturedBlock.js"></script>
+    <script src="js/CameraFunctions.js"></script>
 
     <script>
         
@@ -55,92 +57,28 @@
                 renderer.shadowMapEnabled = true
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-                var container = new THREE.Object3D();
+                var cubeOne = new ConturedBlock(50, 50, 50, "../dirt.png", 0xffffff);
+                scene.add(cubeOne.getBlock());
 
+                var cubeTwo = new ConturedBlock(50, 50, 50, "../dirt.png", 0xffffff);
+                cubeTwo.getBlock().position.x = 50;
+                cubeTwo.getBlock().position.z = 150;
 
-                var geo = new THREE.CubeGeometry(50, 50, 50);
-				var geo2 = new THREE.CubeGeometry(10, 10, 10);
-                var material = new THREE.MeshBasicMaterial({
-                    color: 0xffffff, side: THREE.DoubleSide, map: THREE.ImageUtils.loadTexture("dirt.png")
-                })
-				var material2 = new THREE.MeshBasicMaterial({
-                    color: 0xffffff, side: THREE.DoubleSide, map: THREE.ImageUtils.loadTexture("grass.png")
-                })
-                var Mesh = new THREE.Mesh(geo, material);
-				var GrassMesh = new THREE.Mesh(geo2, material2);
-                container.add(Mesh);
-
-                var lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-                var geometry = new THREE.Geometry();
-                geometry.vertices.push(new THREE.Vector3(-25, -25, -25))
-                geometry.vertices.push(new THREE.Vector3(-25, 25, -25))
-                geometry.vertices.push(new THREE.Vector3(-25, 25, 25))
-                geometry.vertices.push(new THREE.Vector3(-25, -25, 25))
-                geometry.vertices.push(new THREE.Vector3(-25, -25, -25))
-
-                geometry.vertices.push(new THREE.Vector3(25, -25, -25))
-                geometry.vertices.push(new THREE.Vector3(25, 25, -25))
-                geometry.vertices.push(new THREE.Vector3(-25, 25, -25))
-                geometry.vertices.push(new THREE.Vector3(-25, -25, -25))
-
-                geometry.vertices.push(new THREE.Vector3(25, -25, -25))
-                geometry.vertices.push(new THREE.Vector3(25, -25, 25))
-                geometry.vertices.push(new THREE.Vector3(25, 25, 25))
-                geometry.vertices.push(new THREE.Vector3(25, 25, -25))
-                geometry.vertices.push(new THREE.Vector3(25, -25, -25))
-
-                geometry.vertices.push(new THREE.Vector3(25, -25, 25))
-                geometry.vertices.push(new THREE.Vector3(-25, -25, 25))
-                geometry.vertices.push(new THREE.Vector3(-25, 25, 25))
-                geometry.vertices.push(new THREE.Vector3(25, 25, 25))
-				
-				var geometry2 = new THREE.Geometry();
-                geometry2.vertices.push(new THREE.Vector3(-5, -5, -5))
-                geometry2.vertices.push(new THREE.Vector3(-5, 5, -5))
-                geometry2.vertices.push(new THREE.Vector3(-5, 5, 5))
-                geometry2.vertices.push(new THREE.Vector3(-5, -5, 5))
-                geometry2.vertices.push(new THREE.Vector3(-5, -5, -5))
-
-                geometry2.vertices.push(new THREE.Vector3(5, -5, -5))
-                geometry2.vertices.push(new THREE.Vector3(5, 5, -5))
-                geometry2.vertices.push(new THREE.Vector3(-5, 5, -5))
-                geometry2.vertices.push(new THREE.Vector3(-5, -5, -5))
-
-                geometry2.vertices.push(new THREE.Vector3(5, -5, -5))
-                geometry2.vertices.push(new THREE.Vector3(5, -5, 5))
-                geometry2.vertices.push(new THREE.Vector3(5, 5, 5))
-                geometry2.vertices.push(new THREE.Vector3(5, 5, -5))
-                geometry2.vertices.push(new THREE.Vector3(5, -5, -5))
-
-                geometry2.vertices.push(new THREE.Vector3(5, -5, 5))
-                geometry2.vertices.push(new THREE.Vector3(-5, -5, 5))
-                geometry2.vertices.push(new THREE.Vector3(-5, 5, 5))
-                geometry2.vertices.push(new THREE.Vector3(5, 5, 5))
-
-                var line = new THREE.Line(geometry, lineMaterial);
-				var line2 = new THREE.Line(geometry2, lineMaterial);
-
-                container.add(line)
-				var container2 = container.clone();
-				container2.position.x = 50;
-				container2.position.z = 150;
-				
-				var container3 = new THREE.Object3D();
-				container3.add(GrassMesh);
-				container3.add(line2);
+                scene.add(cubeTwo.getBlock());
 				
 				var table = []
-				
-				table.push(container);
-				table.push(container2);
-				
-				player = container3.clone();
+
+                table.push(cubeOne.getBlock());
+                table.push(cubeTwo.getBlock());
+
+                var playersCube = new ConturedBlock(10, 10, 10, "../grass.png", 0xffffff);
+
+                player = playersCube.getBlock();
 				player.position.x = 50;
 				player.position.z = 150;
 				player.position.y = 25 +5;
-				scene.add(player);
-                scene.add(container)
-				scene.add(container2)
+                scene.add(player);
+
                 renderer.setClearColor(0x000000);
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 document.getElementById("main").appendChild(renderer.domElement);
@@ -148,8 +86,13 @@
                 camera.position.x = -300
                 camera.position.y = 0
                 camera.position.z = 0
-var rotation = 0;
-var c=0;
+
+
+
+
+                var rotation = 0;
+                var c = 0;
+
 				function changecamera(){
 					switch(c)
 					{
@@ -177,41 +120,12 @@ var c=0;
 						
 						break;
 					}
-				}
-				var tmo;
-				function rotateLeft(){
-				if(move_axis >=3) move_axis=0;
-				else move_axis++
-				if((move_axis==0||move_axis==3) && speed >0) speed *= -1;
-				if((move_axis==2||move_axis==1) && speed <0) speed *= -1;
-				var it = 0;
-				console.log(move_axis, speed)
-				tmo = setInterval(function(){
-								++it;
-								var tempZ = camera.position.z * Math.cos(Math.PI/180) - camera.position.x * Math.sin(Math.PI/180)
-								var tempX = camera.position.z * Math.sin(Math.PI/180) + camera.position.x * Math.cos(Math.PI/180)
-								camera.position.x = tempX;
-								camera.position.z = tempZ;
-								if(it >=90) clearInterval(tmo);
-							}, 1);
-				}
-				function rotateRight(){
-				if(move_axis <=0) move_axis=3;
-				else move_axis--
-				if((move_axis==0||move_axis==3) && speed >0) speed *= -1;
-				if((move_axis==2||move_axis==1) && speed <0) speed *= -1;
-				var it = 0;
+                }
+
+                
+
 				
-				console.log(move_axis, speed)
-				tmo = setInterval(function(){
-								++it;
-								var tempZ = camera.position.z * Math.cos(-Math.PI/180) - camera.position.x * Math.sin(-Math.PI/180)
-								var tempX = camera.position.z * Math.sin(-Math.PI/180) + camera.position.x * Math.cos(-Math.PI/180)
-								camera.position.x = tempX;
-								camera.position.z = tempZ;
-								if(it >=90) clearInterval(tmo);
-							}, 1);
-				}
+				
 				document.addEventListener("keydown",function(e){
 				//console.log(e.which)
 					switch(e.which)
@@ -230,16 +144,17 @@ var c=0;
 									direction.z = 1;
 							break;
 					}
-				},false)
+                }, false)
+
 				document.addEventListener("keyup",function(e){
 					switch(e.which)
 					{
 						case 39:
-							rotateLeft()
+							rotateLeft(camera)
 							
 							break;
 						case 37:
-							rotateRight();
+                            rotateRight(camera)
 							break;
 						case 65: // A - move left
 								if(move_axis%2 == 0)
@@ -267,7 +182,7 @@ var c=0;
 						var elements_under = GetElementsUnder(scene, player, 1);
 						if(elements_under.length) {
 							console.log(elements_under[0].position.x);
-							player.position.x = elements_under[0].position.x;
+							player.position.x = elements_under[0].position.x - (elements_under[0].position.z - player.position.z);
 						}
 					}
 					else // X
@@ -275,52 +190,11 @@ var c=0;
 						var elements_under = GetElementsUnder(scene, player, 0);
 						if(elements_under.length) {
 							console.log(elements_under[0].position.z);
-							player.position.z = elements_under[0].position.z;
+							player.position.z = elements_under[0].position.z - (elements_under[0].position.x - player.position.x);
 						}
 					}
 					
-					//console.log(GetElementsUnder(scene, player, 0));
-					/*
-					if(move_axis==2)
-					{
-						for(var i=0;i<table.length;i++)
-						{
-							if((table[i].position.x+25 > player.position.x && table[i].position.x-25 < player.position.x) && (table[i].position.y+25 > player.position.y-10 && table[i].position.y-25 < player.position.y-10))
-							{	
-								player.position.z = table[i].position.z
-							}
-						}
-					}
-					if(move_axis==1)
-					{
-						for(var i=0;i<table.length;i++)
-						{
-							if((table[i].position.z+25 > player.position.z &&table[i].position.z-25 < player.position.z) && (table[i].position.y+25 > player.position.y-10 && table[i].position.y-25 < player.position.y-10))
-							{	
-								player.position.x = table[i].position.x
-							}
-						}
-					}
-					if(move_axis==0)
-					{
-						for(var i=0;i<table.length;i++)
-						{
-							if((table[i].position.x-25 > player.position.x && table[i].position.x+25 < player.position.x) && (table[i].position.y+25 > player.position.y-10 && table[i].position.y-25 < player.position.y-10))
-							{	
-								player.position.z = table[i].position.z
-							}
-						}
-					}
-					if(move_axis==3)
-					{
-						for(var i=0;i<table.length;i++)
-						{
-							if((table[i].position.z-25 > player.position.z &&table[i].position.z+25 < player.position.z) && (table[i].position.y+25 > player.position.y-10 && table[i].position.y-25 < player.position.y-10))
-							{	
-								player.position.x = table[i].position.x
-							}
-						}
-					}*/
+					
 					
 					
                     camera.lookAt(scene.position)
