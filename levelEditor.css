@@ -1,0 +1,28 @@
+body{
+    margin:0;
+    padding:0;
+    overflow: hidden;
+}
+#main
+{
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    overflow-y:hidden
+}
+#blockChooser{
+    position: fixed;
+    height: 100%;
+    width:400px;
+    top: 0px;
+    left: 0px;
+    background-color: rgba(255,0,0,0.5);
+    overflow-y: scroll;
+
+}
+img{
+    display:inline-block;
+    margin: 0 auto;
+    margin-right: 5%;
+    width: 45%;
+}

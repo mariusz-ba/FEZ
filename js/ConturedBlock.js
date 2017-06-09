@@ -19,7 +19,7 @@
         })
 
         m_mesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-
+        m_mesh.name="cube"
         container.add(m_mesh);
 
         var lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });

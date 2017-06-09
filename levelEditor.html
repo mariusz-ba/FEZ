@@ -1,0 +1,374 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+    <link href="levelEditor.css" rel="stylesheet" />
+    <script src="libs/three.js"></script>
+    <script src="libs/jquery-3.1.1.js"></script>
+    <script src="js/ElementSiatki.js"></script>
+    <script src="js/ConturedBlock.js"></script>
+    <script src="js/Blocks.js"></script>
+    <script>
+            var main;
+            window.addEventListener("load",
+            function () {
+                function Main() {
+
+                    var scene = new THREE.Scene();
+                    var currentBlock = 0
+                    var renderer = new THREE.WebGLRenderer({ antialias: true });
+                    
+                    
+                    renderer.setClearColor(0x000000);
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    document.getElementById("main").appendChild(renderer.domElement);
+
+                    var rotation =0;
+                    var sidesSpeed=0;
+                    var zoomSpeed=0;
+                    var forwardSpeed=0;
+                    var ySpeed = 0;
+                    var rotationUp = 0;
+                    
+
+                    var camera = new THREE.PerspectiveCamera(
+                    90, // kąt patrzenia kamery (FOV - field of view)
+                    4/3, // proporcje widoku, powinny odpowiadać proporjom naszego ekranu przeglądarki
+                    0.1, // minimalna renderowana odległość
+                    10000 // maxymalna renderowana odległość
+                    );
+
+                    camera.position.x = 75;
+                    camera.position.y = 75;
+                    camera.position.z = 100;
+
+
+                    var axis = new THREE.AxisHelper(500);
+                    var center = new THREE.Vector3(0,0,0)
+                    //scene.add(axis)
+                    var plane = [];
+                    function initPlane() {
+                        for (var i = 0; i < 50; i++) {
+                            plane[i] = [];
+                            for (var j = 0; j < 50; j++) {
+                                var line = new Plane(50, i * 50 - 375, 0, j * 50 - 375);
+                                scene.add(line.getPlane())
+                                plane.push(line.getPlane())
+                            }
+                        }
+
+                    }
+                    initPlane();
+                    for (var i = 0; i < Blocks.length; i++)
+                    {
+                        document.getElementById("blockChooser").innerHTML += "<img class=\"imgBlock\"src=\"" + Blocks[i].icon + "\"/>"
+                    }
+                    var currentBlock = 0;
+                    $(".imgBlock").on("click", function () {
+                        currentBlock = $(this).index()
+                    })
+                    var exportData = []
+
+                    camera.lookAt(scene.position)
+                    var raycaster = new THREE.Raycaster(); // obiekt symulujący "rzucanie" promieni
+                    var mouseVector = new THREE.Vector2()
+
+                    document.addEventListener("click", function (event) {
+                        mouseVector.x = (event.clientX / window.innerWidth) * 2 - 1;
+                        mouseVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+
+                    
+                        raycaster.setFromCamera(mouseVector, camera);
+
+                        var intersects = raycaster.intersectObjects(scene.children,true);
+
+                        if (intersects[0])
+                        {
+                            console.log(intersects[0])
+                            if (intersects[0].object.name == "plane")
+                            {
+                                var temp = Blocks[currentBlock]
+                                var tempCube = new ConturedBlock(temp.width, temp.deep, temp.height, temp.texture, temp.conture).getBlock()
+                                tempCube.position.x = intersects[0].object.position.x
+                                tempCube.position.z = intersects[0].object.position.z
+                                tempCube.position.y = intersects[0].object.position.y + temp.height/2
+                                tempCube.name = "cube";
+                                console.log(tempCube)
+                                scene.add(tempCube)
+                                exportData.push({
+                                    id: currentBlock,
+                                    x: tempCube.position.x,
+                                    y: tempCube.position.y,
+                                    z: tempCube.position.z,
+                                })
+                            } else if (intersects[0].object.name == "cube")
+                            {
+                                var temp = Blocks[currentBlock]
+                                var tempCube = new ConturedBlock(temp.width, temp.deep, temp.height, temp.texture, temp.conture).getBlock()
+                                switch (intersects[0].faceIndex)
+                                {
+                                    case 8:
+                                    case 9:
+                                        {
+                                            tempCube.position.x = intersects[0].object.parent.position.x
+                                            tempCube.position.z = intersects[0].object.parent.position.z + intersects[0].object.geometry.parameters.width;
+                                            tempCube.position.y = intersects[0].object.parent.position.y 
+                                            break;
+                                        }
+                                    case 1:
+                                    case 0:
+                                        {
+                                            tempCube.position.x = intersects[0].object.parent.position.x + intersects[0].object.geometry.parameters.width;
+                                            tempCube.position.z = intersects[0].object.parent.position.z 
+                                            tempCube.position.y = intersects[0].object.parent.position.y
+                                            break;
+                                        }
+                                    case 2:
+                                    case 3:
+                                        {
+                                            tempCube.position.x = intersects[0].object.parent.position.x - intersects[0].object.geometry.parameters.width;
+                                            tempCube.position.z = intersects[0].object.parent.position.z
+                                            tempCube.position.y = intersects[0].object.parent.position.y
+                                            break;
+                                        }
+                                    case 11:
+                                    case 10:
+                                        {
+                                            tempCube.position.x = intersects[0].object.parent.position.x
+                                            tempCube.position.z = intersects[0].object.parent.position.z - intersects[0].object.geometry.parameters.width;
+                                            tempCube.position.y = intersects[0].object.parent.position.y
+                                            break;
+                                        }
+                                    case 4:
+                                    case 5:
+                                        {
+                                            tempCube.position.x = intersects[0].object.parent.position.x
+                                            tempCube.position.z = intersects[0].object.parent.position.z;
+                                            tempCube.position.y = intersects[0].object.parent.position.y + intersects[0].object.geometry.parameters.height
+                                            break;
+                                        }
+                                    case 6:
+                                    case 7:
+                                        {
+                                            tempCube.position.x = intersects[0].object.parent.position.x
+                                            tempCube.position.z = intersects[0].object.parent.position.z;
+                                            tempCube.position.y = intersects[0].object.parent.position.y - intersects[0].object.geometry.parameters.height
+                                            break;
+                                        }
+
+                                }
+                                //tempCube.position.x = intersects[0].object.parent.position.x
+                                //tempCube.position.z = intersects[0].object.parent.position.z
+                                //tempCube.position.y = intersects[0].object.parent.position.y + temp.height / 2 + intersects[0].object.geometry.parameters.height/2
+                                tempCube.name = "cube";
+                                exportData.push({
+                                    id: currentBlock,
+                                    x: tempCube.position.x,
+                                    y: tempCube.position.y,
+                                    z: tempCube.position.z,
+                                })
+                                scene.add(tempCube)
+                            }
+                            
+                        }
+                        
+                    }, true)
+
+                  
+
+                    document.addEventListener("contextmenu", function () {
+                        mouseVector.x = (event.clientX / window.innerWidth) * 2 - 1;
+                        mouseVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+
+
+                        raycaster.setFromCamera(mouseVector, camera);
+
+                        var intersects = raycaster.intersectObjects(scene.children, true);
+
+                        if (intersects[0]) {
+                            if (intersects[0].object.name == "block") {
+                                currentBlock = intersects[0].object
+                                console.log(currentBlock)
+                            }
+
+                        }
+
+                    }, false)
+                    document.addEventListener("keydown", function (e) {
+                        console.log(e.which)
+                        switch(e.which)
+                        {
+                            case 39:
+                            {
+                                rotation = 0.01
+                                break;
+                            }
+                            case 37:{
+                                rotation = -0.01;
+                                break;
+                            }
+                            case 65:{
+                                sidesSpeed = -10;
+                                break;
+                            }
+                            case 68:{
+                                sidesSpeed = 10
+                                break;
+                            }
+                            case 81:{
+                                zoomSpeed = -10;
+                                break;
+                            }
+                            case 69:{
+                                zoomSpeed = 10;
+                                break;
+                            }
+                            case 87:{
+                                forwardSpeed = -10;
+                                break;
+                            }
+                            case 83:{
+                                forwardSpeed = 10;
+                                break;
+                            }
+                            case 17:{
+                                ySpeed = -10;
+                                break;
+                            }
+                            case 32:{
+                                ySpeed = 10;
+                                break;
+                            }
+                            case 38: {
+                                rotationUp = 5
+                                break;
+                            }
+                            case 40: {
+                                rotationUp = -5
+                                break;
+                            }
+                        }
+
+                    }, false)
+
+                    document.addEventListener("keyup", function (e) {
+                        console.log(e.which)
+                        switch(e.which)
+                        {
+                            case 39:
+                            {
+                                rotation = 0
+                                break;
+                            }
+                            case 37:{
+                                rotation = 0
+                                break;
+                            }
+                            case 65:{
+                                sidesSpeed = 0;
+                                break;
+                            }
+                            case 68:{
+                                sidesSpeed = 0
+                                break;
+                            }
+                            case 81:{
+                                zoomSpeed = 0;
+                                break;
+                            }
+                            case 69:{
+                                zoomSpeed = 0;
+                                break;
+                            }
+                            case 87:{
+                                forwardSpeed = 0;
+                                break;
+                            }
+                            case 83:{
+                                forwardSpeed = 0;
+                                break;
+                            }
+                            case 17:{
+                                ySpeed = 0;
+                                break;
+                            }
+                            case 32:{
+                                ySpeed = 0;
+                                break;
+                            }
+                            case 38: {
+                                rotationUp = 0
+                                break;
+                            }
+                            case 40: {
+                                rotationUp = 0
+                                break;
+                            }
+                            case 191: {
+                                console.log(JSON.stringify(exportData))
+                                break;
+                            }
+                        }
+
+                    }, false)
+
+                    function diffrenceVector(v2,v1)
+                    {
+                        return new THREE.Vector3(v2.x-v1.x,v2.y-v1.y,v2.z-v1.z);
+                    }
+
+                    
+                    function animateScene() {
+                        var camPosOld = new THREE.Vector3(camera.position.x,camera.position.y,camera.position.z)
+                        camera.translateY(ySpeed)
+                        center.add(diffrenceVector(camera.position,camPosOld));
+
+                        camera.translateZ(zoomSpeed)
+
+                        var camPosOld = new THREE.Vector3(camera.position.x,camera.position.y,camera.position.z)
+                        camera.translateX(sidesSpeed)
+                        center.add(diffrenceVector(camera.position,camPosOld));
+                        camera.translateX(rotation*1000)
+
+                        
+
+                        var camPosOld = new THREE.Vector3(camera.position.x,camera.position.y,camera.position.z)
+                        camera.translateZ(forwardSpeed)
+                        camera.position.y = camPosOld.y
+                        center.add(diffrenceVector(camera.position, camPosOld));
+
+                        center.y += rotationUp;
+
+
+
+
+                        
+                    // console.log(center)
+
+                        camera.lookAt(center)
+                        
+                        requestAnimationFrame(animateScene);
+
+                        renderer.render(scene, camera);
+                    }
+                    animateScene();
+                }
+                main = new Main();
+            })
+                
+    </script>
+</head>
+<body>
+    <div id="blockChooser">
+
+    </div>
+
+    <div id="main">
+
+    </div>
+    
+</body>
+</html>
