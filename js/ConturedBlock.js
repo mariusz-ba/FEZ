@@ -1,14 +1,16 @@
-﻿function ConturedBlock(_sizeX,_sizeZ,_sizeY,_texture, _contureColor) {
+﻿function ConturedBlock(_sizeX,_sizeZ,_sizeY,_texture, _contureColor,id) {
     var m_sizeX = _sizeX;
     var m_sizeZ = _sizeZ;
     var m_sizeY = _sizeY;
     var m_texture = _texture;
     var m_contureColor = _contureColor;
+    var id = id;
 
     var m_line;
     var m_mesh;
 
     var container = new THREE.Object3D();
+
 
     function init() {
 
@@ -19,7 +21,9 @@
         })
 
         m_mesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        m_mesh.name="cube"
+        m_mesh.name = "cube"
+        m_mesh.myID = id;
+
         container.add(m_mesh);
 
         var lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
@@ -60,6 +64,23 @@
     this.setContureColor = function(color){
         m_contureColor = color;
         m_line.material.color.setHex(m_contureColor);
+    }
+
+
+    this.getSize = function () {
+        return {
+            x: m_sizeX,
+            y: m_sizeY,
+            z: m_sizeZ
+        };
+    }
+
+    this.getID = function () {
+        return id;
+    }
+
+    this.getPosition = function () {
+        return container.position;
     }
 
     init();

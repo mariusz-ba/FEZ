@@ -24,9 +24,11 @@
     </style>
     <script src="libs/jquery-3.1.1.js"></script>
     <script src="libs/three.js"></script>
+    <script src="libs/ColladaLoader.js"></script>
 	<script src="js/RayCaster.js"></script>
     <script src="js/ConturedBlock.js"></script>
     <script src="js/CameraFunctions.js"></script>
+    <script src="js/Player.js"></script>
 
     <script>
         
@@ -40,6 +42,8 @@
 		var speed = 0.5;
 		var move_axis = 1; // 0 - x, 1 - z
 		var scene;
+
+		var mod;
 		
         window.addEventListener("load", function () {
 
@@ -57,10 +61,10 @@
                 renderer.shadowMapEnabled = true
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-                var cubeOne = new ConturedBlock(50, 50, 50, "../dirt.png", 0xffffff);
+                var cubeOne = new ConturedBlock(50, 50, 50, "img/dirt.png", 0xffffff);
                 scene.add(cubeOne.getBlock());
 
-                var cubeTwo = new ConturedBlock(50, 50, 50, "../dirt.png", 0xffffff);
+                var cubeTwo = new ConturedBlock(50, 50, 50, "img/dirt.png", 0xffffff);
                 cubeTwo.getBlock().position.x = 50;
                 cubeTwo.getBlock().position.z = 150;
 
@@ -68,10 +72,10 @@
 				
 				var table = []
 
-                table.push(cubeOne.getBlock());
-                table.push(cubeTwo.getBlock());
+                table.push(cubeOne);
+                table.push(cubeTwo);
 
-                var playersCube = new ConturedBlock(10, 10, 10, "../grass.png", 0xffffff);
+                var playersCube = new ConturedBlock(10, 10, 10, "img/grass.png", 0xffffff);
 
                 player = playersCube.getBlock();
 				player.position.x = 50;
@@ -88,7 +92,18 @@
                 camera.position.z = 0
 
 
+                mod = new Player({
+                    jumpSpeed: 1,
+                    moveSpeed: 1,
+                    gravity: 9
+                });
 
+                mod.loadModel("models/luigi/luigi.dae", function (modelData) {
+                    console.log("model jest załadowany")
+                    console.timeEnd("ładowanie")
+                    //scene.add(modelData)
+                    scene.add(modelData);
+                });
 
                 var rotation = 0;
                 var c = 0;
@@ -142,7 +157,13 @@
 									direction.x = 1;
 								else
 									direction.z = 1;
-							break;
+								break;
+					    case 13: // D - move right
+					        direction.y = 1;
+					        break;
+					    case 83: // D - move right
+					        direction.y = -1;
+					        break;
 					}
                 }, false)
 
@@ -167,7 +188,13 @@
 									direction.x = 0;
 								else
 									direction.z = 0;
-							break;
+								break;
+					    case 32: // D - move right
+					        direction.y = 0;
+					        break;
+					    case 83: // D - move right
+					        direction.y = 0;
+					        break;
 					}
 				},false)
 
@@ -176,26 +203,50 @@
                 function animateScene() {
 					player.position.x += direction.x * speed;
 					player.position.z += direction.z * speed;
+
 					
 					if(move_axis % 2 == 1) // Z
 					{
 						var elements_under = GetElementsUnder(scene, player, 1);
 						if(elements_under.length) {
-							console.log(elements_under[0].position.x);
+							//console.log(elements_under[0].position.x);
 							player.position.x = elements_under[0].position.x - (elements_under[0].position.z - player.position.z);
+						}
+
+					    // collision
+						for (var i = 0; i < table.length; ++i) {
+
+						    if (playersCube.getPosition().z < table[i].getPosition().z + table[i].getSize().z / 2&&
+                                playersCube.getPosition().z + playersCube.getSize().z / 2 > table[i].getPosition().z &&
+                                playersCube.getPosition().y < table[i].getPosition().y + table[i].getSize().y / 2&&
+                                playersCube.getSize().y / 2 + playersCube.getPosition().y > table[i].getPosition().y)
+						    {
+						        console.log("collision");
+						    }
 						}
 					}
 					else // X
 					{
 						var elements_under = GetElementsUnder(scene, player, 0);
 						if(elements_under.length) {
-							console.log(elements_under[0].position.z);
+							//console.log(elements_under[0].position.z);
 							player.position.z = elements_under[0].position.z - (elements_under[0].position.x - player.position.x);
 						}
+
+					    // collision
+						for (var i = 0; i < table.length; ++i) {
+                            
+						    if (playersCube.getPosition().x < table[i].getPosition().x + table[i].getSize().x / 2 &&
+                                playersCube.getPosition().x + playersCube.getSize().x / 2 > table[i].getPosition().x &&
+                                playersCube.getPosition().y < table[i].getPosition().y + table[i].getSize().y / 2 &&
+                                playersCube.getSize().y / 2 + playersCube.getPosition().y > table[i].getPosition().y)
+						    {
+						        console.log("collision");
+						    }
+						}
 					}
-					
-					
-					
+
+					mod.update();
 					
                     camera.lookAt(scene.position)
                     requestAnimationFrame(animateScene);

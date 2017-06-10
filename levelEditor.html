@@ -69,10 +69,46 @@
                         currentBlock = $(this).index()
                     })
                     var exportData = []
-
+                    var id = 0;
+                    var blocksOnPlane = []
                     camera.lookAt(scene.position)
                     var raycaster = new THREE.Raycaster(); // obiekt symulujący "rzucanie" promieni
                     var mouseVector = new THREE.Vector2()
+
+                    document.addEventListener('contextmenu', function (e) {
+                        e.preventDefault();
+                        mouseVector.x = (event.clientX / window.innerWidth) * 2 - 1;
+                        mouseVector.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+
+
+                        raycaster.setFromCamera(mouseVector, camera);
+
+                        var intersects = raycaster.intersectObjects(blocksOnPlane, true);
+
+                          
+                        if (intersects[0])
+                        {
+                            var temp = intersects[0].object.myID;
+                            console.log(intersects[0])
+                            if (temp)
+                            {
+                                for (var i = 0; i < exportData.length; i++)
+                                {
+                                    console.log(temp, exportData[i].id)
+                                    if (exportData[i].id == temp) exportData.splice(i, 1);
+                                }
+                                for (var i = 0; i < blocksOnPlane.length; i++)
+                                {
+                                    if (blocksOnPlane[i].children[0].myID == temp) {
+                                        scene.remove(blocksOnPlane[i])
+                                        blocksOnPlane.splice(i,1)
+                                    }
+                                }
+                            }
+                        }
+
+                    }, false);
 
                     document.addEventListener("click", function (event) {
                         mouseVector.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -90,23 +126,26 @@
                             if (intersects[0].object.name == "plane")
                             {
                                 var temp = Blocks[currentBlock]
-                                var tempCube = new ConturedBlock(temp.width, temp.deep, temp.height, temp.texture, temp.conture).getBlock()
+                                var tempCube = new ConturedBlock(temp.width, temp.deep, temp.height, temp.texture, temp.conture,id).getBlock()
                                 tempCube.position.x = intersects[0].object.position.x
                                 tempCube.position.z = intersects[0].object.position.z
                                 tempCube.position.y = intersects[0].object.position.y + temp.height/2
                                 tempCube.name = "cube";
-                                console.log(tempCube)
+                                blocksOnPlane.push(tempCube)
                                 scene.add(tempCube)
+              
                                 exportData.push({
-                                    id: currentBlock,
+                                    id:id,
+                                    type: currentBlock,
                                     x: tempCube.position.x,
                                     y: tempCube.position.y,
                                     z: tempCube.position.z,
                                 })
+                                id++;
                             } else if (intersects[0].object.name == "cube")
                             {
                                 var temp = Blocks[currentBlock]
-                                var tempCube = new ConturedBlock(temp.width, temp.deep, temp.height, temp.texture, temp.conture).getBlock()
+                                var tempCube = new ConturedBlock(temp.width, temp.deep, temp.height, temp.texture, temp.conture,id).getBlock()
                                 switch (intersects[0].faceIndex)
                                 {
                                     case 8:
@@ -164,11 +203,14 @@
                                 //tempCube.position.y = intersects[0].object.parent.position.y + temp.height / 2 + intersects[0].object.geometry.parameters.height/2
                                 tempCube.name = "cube";
                                 exportData.push({
-                                    id: currentBlock,
+                                    id: id,
+                                    type: currentBlock,
                                     x: tempCube.position.x,
                                     y: tempCube.position.y,
                                     z: tempCube.position.z,
                                 })
+                                id++;
+                                blocksOnPlane.push(tempCube)
                                 scene.add(tempCube)
                             }
                             
