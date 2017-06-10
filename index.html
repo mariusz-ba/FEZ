@@ -29,7 +29,9 @@
     <script src="js/ConturedBlock.js"></script>
     <script src="js/CameraFunctions.js"></script>
     <script src="js/Player.js"></script>
-
+    <script src="js/Blocks.js"></script>
+    <script src="js/LeveData.js"></script>
+    <script src="js/levelLoader.js"></script>
     <script>
         
 		var player;
@@ -39,7 +41,7 @@
 			z: 0
 		}
 		var isMoving = true;
-		var speed = 0.5;
+		var speed = 1;
 		var move_axis = 1; // 0 - x, 1 - z
 		var scene;
 
@@ -54,33 +56,23 @@
 
                 scene = new THREE.Scene();
                 
-                var camera = new THREE.OrthographicCamera(width / - 6, width / 6, height / 6, height / - 6, 1, 1000);
+                var camera = new THREE.OrthographicCamera(width / - 4, width / 4, height / 4, height / -4, 1, 1000);
 
                 var renderer = new THREE.WebGLRenderer({ antialias: true });
 
                 renderer.shadowMapEnabled = true
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-                var cubeOne = new ConturedBlock(50, 50, 50, "img/dirt.png", 0xffffff);
-                scene.add(cubeOne.getBlock());
-
-                var cubeTwo = new ConturedBlock(50, 50, 50, "img/dirt.png", 0xffffff);
-                cubeTwo.getBlock().position.x = 50;
-                cubeTwo.getBlock().position.z = 150;
-
-                scene.add(cubeTwo.getBlock());
+               
 				
 				var table = []
-
-                table.push(cubeOne);
-                table.push(cubeTwo);
 
                 var playersCube = new ConturedBlock(10, 10, 10, "img/grass.png", 0xffffff);
 
                 player = playersCube.getBlock();
-				player.position.x = 50;
-				player.position.z = 150;
-				player.position.y = 25 +5;
+                player.position.x = 55;
+				player.position.z = 145;
+				player.position.y = 300 +5;
                 scene.add(player);
 
                 renderer.setClearColor(0x000000);
@@ -88,7 +80,7 @@
                 document.getElementById("main").appendChild(renderer.domElement);
 
                 camera.position.x = -300
-                camera.position.y = 0
+                camera.position.y = 300
                 camera.position.z = 0
 
 
@@ -98,39 +90,57 @@
                     gravity: 9
                 });
 
-                mod.loadModel("models/luigi/luigi.dae", function (modelData) {
+                var animation;
+
+                mod.loadModel("Model/Pokemon.xml", function (modelData,child) {
                     console.log("model jest załadowany")
                     console.timeEnd("ładowanie")
-                    //scene.add(modelData)
-                    scene.add(modelData);
+                   
+                    scene.add(modelData)
+                    modelData.position.set(55, 300 + 5, 145)
+
+                    //scene.add(modelData);
                 });
 
                 var rotation = 0;
                 var c = 0;
+
+                var level = LevelLoader();
+                scene.add(level.contaier)
+                for (var i = 0; i < level.array.length; i++)
+                {
+                    
+                    table.push(level.array[i]);
+                    console.log(table[i])
+                }
+
+
+                var light = new THREE.AmbientLight(0xffffff,1); // soft white light
+                scene.add(light);
+                //light.castShadow = true
+
+
+                
 
 				function changecamera(){
 					switch(c)
 					{
 						case 0:
 						camera.position.x = -300
-							camera.position.y = 0
 							camera.position.z = 0
 						break;
 						case 1:
 						camera.position.x = 0
-							camera.position.y = 0
 							camera.position.z = 300
 						
 						break;
 						case 2:
 						camera.position.x = 300
-							camera.position.y = 0
 							camera.position.z = 0
 						
 						break;
 						case 3:
 						camera.position.x = 0
-							camera.position.y = 0
 							camera.position.z = -300
 						
 						break;
@@ -142,7 +152,6 @@
 				
 				
 				document.addEventListener("keydown",function(e){
-				//console.log(e.which)
 					switch(e.which)
 					{
 						
@@ -198,21 +207,29 @@
 					}
 				},false)
 
-				
+                camera.lookAt(player.position)
+                console.log(camera.position)
 
+                renderer.shadowMapEnabled = true
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                var clock = new THREE.Clock();
                 function animateScene() {
+
+
 					player.position.x += direction.x * speed;
 					player.position.z += direction.z * speed;
 
 					
 					if(move_axis % 2 == 1) // Z
-					{
+                    {
+                        /*
 						var elements_under = GetElementsUnder(scene, player, 1);
 						if(elements_under.length) {
 							//console.log(elements_under[0].position.x);
 							player.position.x = elements_under[0].position.x - (elements_under[0].position.z - player.position.z);
 						}
-
+                        */
 					    // collision
 						for (var i = 0; i < table.length; ++i) {
 
@@ -226,13 +243,13 @@
 						}
 					}
 					else // X
-					{
+					{/*
 						var elements_under = GetElementsUnder(scene, player, 0);
 						if(elements_under.length) {
 							//console.log(elements_under[0].position.z);
 							player.position.z = elements_under[0].position.z - (elements_under[0].position.x - player.position.x);
 						}
-
+                    */
 					    // collision
 						for (var i = 0; i < table.length; ++i) {
                             
@@ -246,14 +263,16 @@
 						}
 					}
 
-					mod.update();
+					//mod.update();
 					
-                    camera.lookAt(scene.position)
+                    
                     requestAnimationFrame(animateScene);
 					//var tempZ = camera.position.z * Math.cos(rotation) - camera.position.x * Math.sin(rotation)
                     //var tempX = camera.position.z * Math.sin(rotation) + camera.position.x * Math.cos(rotation)
                     //camera.position.x = tempX;
                     //camera.position.z = tempZ
+
+                    camera.lookAt(new THREE.Vector3(0, camera.position.y,0))
 
                     renderer.render(scene, camera);
                 }

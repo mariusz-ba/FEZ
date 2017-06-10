@@ -9,6 +9,8 @@
     <script src="js/ElementSiatki.js"></script>
     <script src="js/ConturedBlock.js"></script>
     <script src="js/Blocks.js"></script>
+    <script src="js/LeveData.js"></script>
+    <script src="js/levelLoader.js"></script>
     <script>
             var main;
             window.addEventListener("load",
@@ -44,6 +46,8 @@
                     camera.position.z = 100;
 
 
+                    
+
                     var axis = new THREE.AxisHelper(500);
                     var center = new THREE.Vector3(0,0,0)
                     //scene.add(axis)
@@ -74,6 +78,11 @@
                     camera.lookAt(scene.position)
                     var raycaster = new THREE.Raycaster(); // obiekt symulujący "rzucanie" promieni
                     var mouseVector = new THREE.Vector2()
+
+
+                    var light = new THREE.AmbientLight(0x404040,4); // soft white light
+                    scene.add(light);
+
 
                     document.addEventListener('contextmenu', function (e) {
                         e.preventDefault();
@@ -362,6 +371,17 @@
                         return new THREE.Vector3(v2.x-v1.x,v2.y-v1.y,v2.z-v1.z);
                     }
 
+
+                    var level = LevelLoader();
+                    for (var i = 0; i < level.array.length; i++) {
+                        blocksOnPlane.push(level.array[i].getBlock())
+                        scene.add(level.array[i].getBlock())
+                    }
+                    for (var i = 0; i < LevelData.length; i++)
+                    {
+                        exportData.push(LevelData[i]);
+                    }
+                    id = exportData[exportData.length-1].id;
                     
                     function animateScene() {
                         var camPosOld = new THREE.Vector3(camera.position.x,camera.position.y,camera.position.z)

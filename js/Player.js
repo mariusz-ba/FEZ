@@ -32,7 +32,10 @@
         loader.load(url, function (collada) {
 
             daeModel = collada.scene;
-            daeModel.scale.set(1, 1, 1)
+            daeModel.scale.set(12, 12, 12)
+
+            console.log()
+
 
             daeModel.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
